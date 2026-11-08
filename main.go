@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"wruffic/api"
+	"wruffic/cli"
 	"wruffic/player"
 
 	"github.com/joho/godotenv"
@@ -19,25 +21,58 @@ func main() {
 	user := os.Getenv("NAVI_USERNAME")
 	pass := os.Getenv("NAVI_PASSWORD")
 	if host == "" || user == "" || pass == "" {
-		log.Fatal("missing NAVI_HOST / NAVI_USERNAME / NAVI_PASSWORD")
+		log.Fatal("WRUFF WRUFF, Ewwow in main :3")
 	}
 
 	client := api.NewClient(host, user, pass)
-
-	Songs, err := client.GetID()
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	p, err := player.New(client)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer p.Close()
 
-	if err := p.PlayAlbum(Songs); err != nil {
-		log.Fatal(err)
-	}
+	for {
+		query, err := cli.GetSearchQuery()
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
 
+		searchResults, err := client.SearchReq(query)
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+
+		id, kind, err := cli.PickSongs(&api.Client{},searchResults)
+		if err != nil {
+			fmt.Println(err)
+			break
+		}
+		if id == "" {
+			continue
+		}
+
+		var Songs []api.Song
+		if kind == "album" {
+			Songs, err = client.GetAlbum(id)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+		} else if kind == "song" {
+			Songs, err = client.GetSong(id)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+		}
+
+		if err := p.Player(Songs); err != nil {
+			fmt.Println(err)
+			break
+		}
+
+	}
 	select {}
 }

@@ -28,9 +28,9 @@ func New(client *api.Client) (*Player, error) {
 	return &Player{client: client, mpv: m}, nil
 }
 
-func (p *Player) PlayAlbum(Songs []api.Song) error{
+func (p *Player) Player(Songs []api.Song) error{
 	for _, s := range Songs {
-		fmt.Printf("Track: %d\nTitle: %s\nDuration: %d seconds", s.Track, s.Title, s.Duration)
+		fmt.Printf("\nTrack: %d\nTitle: %s\nDuration: %d seconds\n", s.Track, s.Title, s.Duration)
 		url, err := p.client.StreamURL(s.ID)
 		if err != nil {
 			return fmt.Errorf("wuff stweam faw %s failed with: %v", s.Title, err)

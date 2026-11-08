@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"net/url"
+	"time"
 
 	"resty.dev/v3"
 )
@@ -21,6 +22,7 @@ func NewClient(host, user, pass string) *Client {
 
 	c.http = resty.New().
 		SetBaseURL(host).
+		SetTimeout(10 *time.Second).
 		SetQueryParam("u", user).
 		SetQueryParam("v", "1.16.1").
 		SetQueryParam("c", "wruffic").

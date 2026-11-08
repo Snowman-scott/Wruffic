@@ -4,19 +4,34 @@ import (
 	"fmt"
 )
 
-func (c *Client) GetID() ([]Song, error) {
+func (c *Client) GetAlbum(id string) ([]Song, error) {
 	var w Wrapper
 	_, err := c.http.R().
-		SetQueryParam("id", "2S30zbYPVC0wSs7Qr5OkHL").
+		SetQueryParam("id", id).
 		SetResult(&w).
 		Get("/rest/getAlbum")
 	if err != nil {
 		return nil, fmt.Errorf("wruff I bwoke :D\nError: %v", err)
 	}
 	if w.SubsonicResponse.Status != "ok" {
-		return nil, fmt.Errorf("navi status not okay\nError: %v", err)
+		return nil, fmt.Errorf("navi status not okay\n Navi Status: %v",w.SubsonicResponse.Status )
 	}
 	return w.SubsonicResponse.Album.Songs, nil
+}
+
+func (c *Client) GetSong(id string) ([]Song, error) {
+	var w Wrapper
+	_, err := c.http.R().
+		SetQueryParam("id", id).
+		SetResult(&w).
+		Get("/rest/getSong")
+	if err != nil {
+		return nil, fmt.Errorf("wruff I bwoke :P\nError: %v", err)
+	}
+	if w.SubsonicResponse.Status != "ok" {
+		return nil, fmt.Errorf("navi status not okay\n Navi Status: %v",w.SubsonicResponse.Status )
+	}
+	return []Song{w.SubsonicResponse.SingleSong}, nil
 }
 
 func (c *Client) StreamURL(songID string) (string, error) {
